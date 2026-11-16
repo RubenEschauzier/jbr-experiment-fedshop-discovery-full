@@ -1,0 +1,11 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/jbr/^6.0.0/components/context.jsonld"
+  ],
+  "@id": "urn:jbr:fedshop-discovery-full-experiment-combinations",
+  "@type": "FullFactorialCombinationProvider",
+  "commonGenerated": true,
+  "factors": {
+    "alg": ["derived", "derived-pattern-only", "adaptive-only", "derived-no-prio", "default"]
+  }
+}

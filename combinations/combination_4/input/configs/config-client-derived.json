@@ -1,0 +1,8 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/config-query-sparql-link-traversal/^0.0.0/components/context.jsonld"
+  ],
+  "import": [
+    "ccqslt:config/configs-fedshop/config-fedshop-discovery-adaptive-derived-resources-hybrid-federation.json"
+  ]
+}
