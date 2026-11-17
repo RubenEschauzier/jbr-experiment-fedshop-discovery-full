@@ -29,20 +29,20 @@ members:
   shops: 20
   review_sites: 20
   # Number of different products sold by shops
-  pool: 20000                  
+  pool: 10000                  
   # Average offers per shop
-  offers: 2000  
+  offers: 1000  
   # average reviews per review site               
-  reviews: 10000               
+  reviews: 5000               
   reviews_per_reviewer: 100
   seed: 42
 # Producers who publish their products, which are always in the discovery part of benchmark
 brands:                 
   # over all brands (at least members.pool): 27 to 3,295 per brand       
-  products: 40000
+  products: 30000
   # Number of brands             
   count: 400
-  zipf: 0.8
+  zipf: 0.6
   min_products: 20
   # The share of largest brands that run a query service
   service_share: 0.25          
