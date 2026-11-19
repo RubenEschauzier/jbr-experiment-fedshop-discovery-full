@@ -1,0 +1,65 @@
+{
+  "baseOverrides": "input/discovery-overrides.yaml",
+  "jbr": [
+    "npm",
+    "run",
+    "jbr",
+    "--"
+  ],
+  "select": "data",
+  "kinds": [
+    "brands",
+    "shops",
+    "review_sites"
+  ],
+  "fractions": [
+    {
+      "fraction": 0,
+      "productFractionTarget": 0,
+      "memberFractionTarget": {
+        "shops": 0,
+        "review_sites": 0
+      }
+    },
+    {
+      "fraction": 0.2,
+      "productFractionTarget": 0.2,
+      "memberFractionTarget": {
+        "shops": 0.2,
+        "review_sites": 0.2
+      }
+    },
+    {
+      "fraction": 0.4,
+      "productFractionTarget": 0.4,
+      "memberFractionTarget": {
+        "shops": 0.4,
+        "review_sites": 0.4
+      }
+    },
+    {
+      "fraction": 0.6,
+      "productFractionTarget": 0.6,
+      "memberFractionTarget": {
+        "shops": 0.6,
+        "review_sites": 0.6
+      }
+    },
+    {
+      "fraction": 0.8,
+      "productFractionTarget": 0.8,
+      "memberFractionTarget": {
+        "shops": 0.8,
+        "review_sites": 0.8
+      }
+    },
+    {
+      "fraction": 1,
+      "productFractionTarget": 1,
+      "memberFractionTarget": {
+        "shops": 1,
+        "review_sites": 1
+      }
+    }
+  ]
+}

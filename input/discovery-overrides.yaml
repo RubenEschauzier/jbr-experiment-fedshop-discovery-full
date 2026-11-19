@@ -44,10 +44,23 @@ brands:
   count: 400
   zipf: 0.6
   min_products: 20
-  # The share of largest brands that run a query service
-  service_share: 0.25          
   # product types available in 1 market, 2, or all
   type_spread: {1: 0.6, 2: 0.3, all: 0.1}   
+  seed: 42
+# Which discoverable publishers run a query service. Known shops and review sites always do, the taxonomy
+# and reviewers never. scripts/vary-endpoint-fraction.js replaces this section per fraction.
+services:
+  # largest: the largest publishers of a kind, this share of their number;
+  # data: publishers in a seeded random order until they hold this share of the kind's data
+  # (a larger share keeps every service of a smaller one)
+  select: largest
+  # Brands; their size is their products
+  brands: 0.25
+  # Discovered shops; their size is their offers
+  shops: 1.0
+  # Discovered review sites; their size is their reviews
+  review_sites: 1.0
+  # The order of select: data
   seed: 42
 links:                      
   reviews: 0

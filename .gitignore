@@ -8,3 +8,6 @@
 !/combinations/*/generated/.keep
 /combinations/*/output/*
 !/combinations/*/output/.keep
+/output-*/
+/fingerprint-mismatch-*.json
+/input/discovery-overrides.endpoints-*.yaml
