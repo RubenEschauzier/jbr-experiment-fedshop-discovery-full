@@ -44,11 +44,17 @@ brands:
   count: 400
   zipf: 0.6
   min_products: 20
-  # The share of largest brands that run a query service
-  service_share: 0.25          
   # product types available in 1 market, 2, or all
   type_spread: {1: 0.6, 2: 0.3, all: 0.1}   
   seed: 42
+services:
+  # largest: the largest x% share of publishers of a kind get an endpoint
+  select: largest              
+  brands: 0.25                 
+  # Discovered shops and review sites, known ones always get endpoints
+  shops: 1.0                   
+  review_sites: 1.0            
+  seed: 42                     
 links:                      
   reviews: 0
   where_to_buy: 0
