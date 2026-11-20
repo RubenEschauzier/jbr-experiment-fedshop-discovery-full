@@ -16,6 +16,11 @@ $ npm install
 
 ## Usage
 
+Generate combinations to use all latest versions:
+```bash
+$ npm run jbr -- generate-combinations
+```
+
 Generate the dataset and queries:
 
 ```bash
