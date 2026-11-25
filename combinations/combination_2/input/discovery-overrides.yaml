@@ -48,13 +48,15 @@ brands:
   type_spread: {1: 0.6, 2: 0.3, all: 0.1}   
   seed: 42
 services:
-  # largest: the largest x% share of publishers of a kind get an endpoint
-  select: largest              
-  brands: 0.25                 
-  # Discovered shops and review sites, known ones always get endpoints
-  shops: 1.0                   
-  review_sites: 1.0            
-  seed: 42                     
+  # The default point of the evaluation: every discoverable publisher runs a query service (known ones always do).
+  # The coverage axis lowers all three shares together; `data` takes publishers in a seeded random order until
+  # their data reaches the share, so a larger share keeps every service of a smaller one. At 1.0 both selections
+  # are the same.
+  select: data
+  brands: 1.0
+  shops: 1.0
+  review_sites: 1.0
+  seed: 42
 links:                      
   reviews: 0
   where_to_buy: 0
