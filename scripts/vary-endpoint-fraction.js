@@ -14,9 +14,9 @@
 //          --force redoes them.
 // The config defaults to ./vary-endpoint-fraction.json; the experiment is the config's directory
 // unless the config names another one (`experiment`). In a combination-based experiment
-// (jbr-combinations.json, with commonGenerated) every fraction is generated once and run for every
-// combination: output-<fraction>/combination_<i>/ holds each combination's output. Only Node's own
-// modules are used.
+// (jbr-combinations.json, with commonGenerated) every fraction is generated once and run for its
+// combinations (`combinations` per fraction or in the config; all by default):
+// output-<fraction>/combination_<i>/ holds each combination's output. Only Node's own modules are used.
 'use strict';
 const Path = require('node:path');
 const fs = require('node:fs');
@@ -177,6 +177,10 @@ function planFraction(config, fraction, brands) {
   if (config.kinds.some(key => key !== 'brands')) {
     entry.memberFractionTarget = Object.fromEntries(config.kinds.filter(key => key !== 'brands').map(key => [ key, fraction ]));
   }
+  const { spec } = config.selection[label(fraction)];
+  if (spec !== undefined) {
+    entry.combinations = spec;
+  }
   return entry;
 }
 
@@ -225,13 +229,23 @@ function loadConfig(configPath) {
   if (!Array.isArray(kinds) || kinds.length === 0 || kinds.some(key => !(key in KINDS)) || new Set(kinds).size !== kinds.length) {
     throw new Error(`kinds must list some of ${Object.keys(KINDS).join(', ')}`);
   }
-  const fractions = (raw.fractions ?? []).map(f => typeof f === 'number' ? f : f.fraction);
+  const entries = raw.fractions ?? [];
+  const fractions = entries.map(f => typeof f === 'number' ? f : f.fraction);
   if (fractions.length === 0 || fractions.some(f => typeof f !== 'number' || !(f >= 0 && f <= 1))) {
     throw new Error('fractions must list fractions between 0 and 1');
   }
   const labels = fractions.map(label);
   if (new Set(labels).size !== labels.length) {
     throw new Error(`fractions must be distinct: ${labels.join(', ')}`);
+  }
+  // Which combinations run: per fraction, else the config's default, else all of them
+  const selection = {};
+  for (const [ i, entry ] of entries.entries()) {
+    const spec = typeof entry === 'object' && entry.combinations !== undefined ? entry.combinations : raw.combinations;
+    selection[labels[i]] = {
+      spec: typeof entry === 'object' ? entry.combinations : undefined,
+      combinations: selectCombinations(spec, combinations, `fraction ${labels[i]}`),
+    };
   }
   const baseOverrides = raw.baseOverrides ?? 'input/discovery-overrides.yaml';
   const baseOverridesPath = Path.resolve(experiment, baseOverrides);
@@ -240,6 +254,7 @@ function loadConfig(configPath) {
     raw,
     experiment,
     combinations,
+    selection,
     select,
     kinds,
     baseOverrides,
@@ -251,40 +266,97 @@ function loadConfig(configPath) {
   };
 }
 
+/** The factor values of every combination, in jbr's order (as jbr's FullFactorialCombinationProvider). */
+function factorCombinations(factors) {
+  let combinations = [ {} ];
+  for (const [ factor, values ] of Object.entries(factors)) {
+    combinations = values.flatMap(value => combinations.map(combination => ({ ...combination, [factor]: value })));
+  }
+  return combinations;
+}
+
 /**
- * The combinations of a combination-based experiment (combinations/combination_<i>, in jbr's order), or
- * undefined for an experiment with one jbr-experiment.json. Its combinations must share generated/
- * (commonGenerated): a fraction is one generation, which every combination runs against.
+ * The combinations of a combination-based experiment (combinations/combination_<i>, in jbr's order, each
+ * with its id and factor values), or undefined for an experiment with one jbr-experiment.json. Its
+ * combinations must share generated/ (commonGenerated): a fraction is one generation, which every
+ * combination runs against.
  */
 function readCombinations(experiment) {
   const file = Path.join(experiment, 'jbr-combinations.json');
   if (!fs.existsSync(file)) {
     return undefined;
   }
-  if (JSON.parse(fs.readFileSync(file, 'utf8')).commonGenerated !== true) {
+  const provider = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (provider.commonGenerated !== true) {
     throw new Error(`${file} must set "commonGenerated": true, so that every combination runs against the same generation`);
   }
   const dir = Path.join(experiment, 'combinations');
-  const combinations = (fs.existsSync(dir) ? fs.readdirSync(dir) : [])
+  const names = (fs.existsSync(dir) ? fs.readdirSync(dir) : [])
     .filter(name => /^combination_\d+$/u.test(name) && fs.existsSync(Path.join(dir, name, EXPERIMENT_CONFIG)))
     .sort((a, b) => Number(a.split('_')[1]) - Number(b.split('_')[1]));
-  if (combinations.length === 0) {
+  if (names.length === 0) {
     throw new Error(`No combinations/combination_*/${EXPERIMENT_CONFIG}: run npm run jbr -- generate-combinations first`);
   }
-  return combinations;
+  const factors = factorCombinations(provider.factors ?? {});
+  if (names.length !== factors.length || names.some((name, i) => name !== `combination_${i}`)) {
+    throw new Error(`combinations/ holds ${names.join(', ')}, but jbr-combinations.json gives ${factors.length} ` +
+      'combinations: run npm run jbr -- generate-combinations again');
+  }
+  return names.map((name, id) => ({ name, id, factors: factors[id] }));
+}
+
+/**
+ * The combinations a list of factor values selects, in jbr's order; all of them if there is no list. An
+ * entry is an object of factor values (it selects every combination with those values), or, if there is
+ * only one factor, that factor's value.
+ */
+function selectCombinations(spec, combinations, where) {
+  if (spec === undefined) {
+    return combinations;
+  }
+  if (!combinations) {
+    throw new Error(`${where}: combinations can only be chosen in an experiment with jbr-combinations.json`);
+  }
+  if (!Array.isArray(spec) || spec.length === 0) {
+    throw new Error(`${where}: combinations must be a non-empty list of factor values`);
+  }
+  const factorNames = Object.keys(combinations[0].factors);
+  const ids = new Set();
+  for (const entry of spec) {
+    if (typeof entry === 'string' && factorNames.length !== 1) {
+      throw new Error(`${where}: with factors ${factorNames.join(', ')}, a combination is an object of factor values, not ${JSON.stringify(entry)}`);
+    }
+    const wanted = typeof entry === 'string' ? { [factorNames[0]]: entry } : entry;
+    const matches = combinations.filter(c => Object.entries(wanted).every(([ key, value ]) => c.factors[key] === value));
+    if (matches.length === 0) {
+      throw new Error(`${where}: no combination has ${JSON.stringify(wanted)}`);
+    }
+    for (const match of matches) {
+      ids.add(match.id);
+    }
+  }
+  return combinations.filter(c => ids.has(c.id));
+}
+
+/** A combination as it is recorded: its name and factor values. */
+function describeCombination(combination) {
+  return { name: combination.name, ...combination.factors };
 }
 
 /** The jbr-experiment.json files of the experiment: one, or one per combination. */
 function experimentConfigs(config) {
   return config.combinations ?
-    config.combinations.map(name => Path.join(config.experiment, 'combinations', name, EXPERIMENT_CONFIG)) :
+    config.combinations.map(({ name }) => Path.join(config.experiment, 'combinations', name, EXPERIMENT_CONFIG)) :
     [ Path.join(config.experiment, EXPERIMENT_CONFIG) ];
 }
 
-/** Where jbr run writes: output/, or each combination's output/, with the name it gets in output-<fraction>/. */
-function outputDirs(config) {
-  return config.combinations ?
-    config.combinations.map(name => ({ name, dir: Path.join(config.experiment, 'combinations', name, 'output') })) :
+/**
+ * Where jbr run writes: output/, or each given combination's output/, with the name it gets in
+ * output-<fraction>/.
+ */
+function outputDirs(config, combinations = config.combinations) {
+  return combinations ?
+    combinations.map(({ name }) => ({ name, dir: Path.join(config.experiment, 'combinations', name, 'output') })) :
     [ { name: undefined, dir: Path.join(config.experiment, 'output') } ];
 }
 
@@ -311,6 +383,11 @@ function printPlan(config, planned) {
       `${(p.fraction * 100).toFixed(2)}%${config.select === 'largest' ? '' : ' of their offers or reviews'}` :
       '';
     console.log(`  ${label(p.fraction).padEnd(8)} ${brands}${members}`);
+    const selected = config.selection[label(p.fraction)].combinations;
+    if (selected) {
+      const values = selected.map(c => Object.values(c.factors).join('/'));
+      console.log(`  ${''.padEnd(8)} runs ${selected.length}/${config.combinations.length} combinations: ${values.join(', ')}`);
+    }
   }
 }
 
@@ -663,6 +740,7 @@ async function runFraction(config, planned, force) {
   const name = label(planned.fraction);
   const experiment = config.experiment;
   const generated = Path.join(experiment, 'generated');
+  const selected = config.selection[name].combinations;
   const outputs = outputDirs(config);
   const target = Path.join(experiment, `output-${name}`);
 
@@ -745,12 +823,18 @@ async function runFraction(config, planned, force) {
       `${(result[key].fraction * 100).toFixed(2)}% of their ${KINDS[key].size}`);
   }
 
-  // Run (every combination), then keep the output under the fraction's name
-  await jbr(config, [ 'run' ]);
+  // Run the fraction's combinations, then keep their output under the fraction's name
+  if (!selected || selected.length === config.combinations.length) {
+    await jbr(config, [ 'run' ]);
+  } else {
+    for (const { id } of selected) {
+      await jbr(config, [ 'run', '-c', String(id) ]);
+    }
+  }
   if (config.combinations) {
     fs.mkdirSync(target);
   }
-  for (const { name: combination, dir } of outputs) {
+  for (const { name: combination, dir } of outputDirs(config, selected)) {
     const kept = combination ? Path.join(target, combination) : target;
     fs.renameSync(dir, kept);
     fs.mkdirSync(dir);
@@ -775,7 +859,7 @@ async function runFraction(config, planned, force) {
   fs.writeFileSync(Path.join(target, SUMMARY), `${JSON.stringify({
     fraction: planned.fraction,
     design: { select: config.select, kinds: config.kinds, base: config.base },
-    combinations: config.combinations,
+    combinations: selected?.map(describeCombination),
     services,
     endpoints: endpoints.size,
     ...result,
@@ -829,5 +913,5 @@ if (require.main === module) {
 
 module.exports = {
   brandSizes, pyRound, readSection, withServices, baseServices, servicesFor, fingerprint, measure, coverage,
-  differences, endpointSet, checkNested,
+  differences, endpointSet, checkNested, factorCombinations, selectCombinations,
 };

@@ -12,6 +12,10 @@
     "shops",
     "review_sites"
   ],
+  "combinations": [
+    "derived-pattern-only",
+    "derived-extended-bound"
+  ],
   "fractions": [
     {
       "fraction": 0,
@@ -19,38 +23,35 @@
       "memberFractionTarget": {
         "shops": 0,
         "review_sites": 0
+      },
+      "combinations": [
+        "derived-pattern-only",
+        "derived-extended-bound",
+        "adaptive-only"
+      ]
+    },
+    {
+      "fraction": 0.25,
+      "productFractionTarget": 0.25,
+      "memberFractionTarget": {
+        "shops": 0.25,
+        "review_sites": 0.25
       }
     },
     {
-      "fraction": 0.2,
-      "productFractionTarget": 0.2,
+      "fraction": 0.5,
+      "productFractionTarget": 0.5,
       "memberFractionTarget": {
-        "shops": 0.2,
-        "review_sites": 0.2
+        "shops": 0.5,
+        "review_sites": 0.5
       }
     },
     {
-      "fraction": 0.4,
-      "productFractionTarget": 0.4,
+      "fraction": 0.75,
+      "productFractionTarget": 0.75,
       "memberFractionTarget": {
-        "shops": 0.4,
-        "review_sites": 0.4
-      }
-    },
-    {
-      "fraction": 0.6,
-      "productFractionTarget": 0.6,
-      "memberFractionTarget": {
-        "shops": 0.6,
-        "review_sites": 0.6
-      }
-    },
-    {
-      "fraction": 0.8,
-      "productFractionTarget": 0.8,
-      "memberFractionTarget": {
-        "shops": 0.8,
-        "review_sites": 0.8
+        "shops": 0.75,
+        "review_sites": 0.75
       }
     },
     {

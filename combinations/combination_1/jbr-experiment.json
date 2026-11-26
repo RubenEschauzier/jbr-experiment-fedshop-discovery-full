@@ -6,13 +6,13 @@
   ],
   "@id": "urn:jbr:fedshop-discovery-full-experiment:combination_1",
   "@type": "ExperimentFedShopDiscovery",
-  "generatorImage": "rubeneschauzier/fedshop-discovery-generator@sha256:e726c594475edd5e9b9b9a3257aa20e322ab8d356ecfed430e53751a522f3b0f",
+  "generatorImage": "rubeneschauzier/fedshop-discovery-generator:dev",
   "virtuosoImage": "openlink/virtuoso-opensource-7@sha256:2c7453b3e401bca274f46972117a18cf1965c6b30afb9b8c86cb4340c0c9ba70",
   "fedshopConfig": "experiments/bsbm/snakefile/config.yaml",
   "configOverrides": "input/discovery-overrides.yaml",
   "queryForm": "plain",
   "sourceNamespaces": true,
-  "queryInstances": [],
+  "queryInstances": [0],
   "endpointUrl": "http://localhost:3001/sparql",
   "proxyControlPort": 3999,
   "proxyRequestLog": false,
@@ -20,7 +20,7 @@
   "virtuosoBuffersMain": 340000,
   "virtuosoBuffersKnown": 85000,
   "readinessTimeout": 600,
-  "queryRunnerReplication": 6,
+  "queryRunnerReplication": 3,
   "queryRunnerWarmupRounds": 1,
   "queryRunnerRequestDelay": 0,
   "queryRunnerEndpointAvailabilityCheckTimeout": 1000,
@@ -29,7 +29,7 @@
   "hookSparqlEndpoint": {
     "@id": "urn:jbr:fedshop-discovery-full-experiment:combination_1:hookSparqlEndpoint",
     "@type": "HookSparqlEndpointComunica",
-    "dockerfileClient": "input/dockerfiles/Dockerfile-client",
+    "dockerfileClient": "input/dockerfiles/Dockerfile-client-derived-pattern-only",
     "resourceConstraints": {
       "@type": "StaticDockerResourceConstraints",
       "cpu_percentage": 100

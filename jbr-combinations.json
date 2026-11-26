@@ -6,6 +6,12 @@
   "@type": "FullFactorialCombinationProvider",
   "commonGenerated": true,
   "factors": {
-    "alg": ["derived", "derived-pattern-only", "adaptive-only", "derived-no-prio", "default"]
+    "alg": [
+      "derived",
+      "derived-pattern-only",
+      "derived-extended-bound",
+      "adaptive-only",
+      "default"
+    ]
   }
 }
