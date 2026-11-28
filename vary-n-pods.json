@@ -1,0 +1,144 @@
+{
+  "baseOverrides": "input/discovery-overrides.yaml",
+  "jbr": [
+    "npm",
+    "run",
+    "jbr",
+    "--"
+  ],
+  "scaled": {
+    "brands.count": "scale",
+    "brands.products": "scale",
+    "members.shops": "discoverable",
+    "members.review_sites": "discoverable",
+    "members.pool": "members"
+  },
+  "known": {
+    "shops": 10,
+    "review_sites": 10
+  },
+  "combinations": [
+    "derived-pattern-only",
+    "derived-extended-bound"
+  ],
+  "points": [
+    {
+      "label": "0.5",
+      "scale": 0.5,
+      "overrides": {
+        "brands.count": 200,
+        "brands.products": 15000,
+        "members.shops": 15,
+        "members.review_sites": 15,
+        "members.pool": 7500,
+        "known.ratio": 0.6666666666666666
+      },
+      "known": {
+        "shops": {
+          "members": 15,
+          "known": 10,
+          "discoverable": 5
+        },
+        "review_sites": {
+          "members": 15,
+          "known": 10,
+          "discoverable": 5
+        }
+      },
+      "memoryEstimateGiB": 13.7
+    },
+    {
+      "label": "1",
+      "scale": 1,
+      "overrides": {
+        "brands.count": 400,
+        "brands.products": 30000,
+        "members.shops": 20,
+        "members.review_sites": 20,
+        "members.pool": 10000,
+        "known.ratio": 0.5
+      },
+      "known": {
+        "shops": {
+          "members": 20,
+          "known": 10,
+          "discoverable": 10
+        },
+        "review_sites": {
+          "members": 20,
+          "known": 10,
+          "discoverable": 10
+        }
+      },
+      "memoryEstimateGiB": 13.7
+    },
+    {
+      "label": "2",
+      "scale": 2,
+      "settings": {
+        "hookSparqlEndpoint.queryTimeout": 360,
+        "queryTimeoutFallback": 480000,
+        "virtuosoBuffersMain": 680000,
+        "readinessTimeout": 1200
+      },
+      "overrides": {
+        "brands.count": 800,
+        "brands.products": 60000,
+        "members.shops": 30,
+        "members.review_sites": 30,
+        "members.pool": 15000,
+        "known.ratio": 0.3333333333333333
+      },
+      "known": {
+        "shops": {
+          "members": 30,
+          "known": 10,
+          "discoverable": 20
+        },
+        "review_sites": {
+          "members": 30,
+          "known": 10,
+          "discoverable": 20
+        }
+      },
+      "memoryEstimateGiB": 16.7
+    },
+    {
+      "label": "4",
+      "scale": 4,
+      "optional": true,
+      "gate": {
+        "maxFailureShare": 0.1,
+        "maxMemoryPercent": 80,
+        "point": "2"
+      },
+      "settings": {
+        "hookSparqlEndpoint.queryTimeout": 720,
+        "queryTimeoutFallback": 840000,
+        "virtuosoBuffersMain": 1360000,
+        "readinessTimeout": 2400
+      },
+      "overrides": {
+        "brands.count": 1600,
+        "brands.products": 120000,
+        "members.shops": 50,
+        "members.review_sites": 50,
+        "members.pool": 25000,
+        "known.ratio": 0.2
+      },
+      "known": {
+        "shops": {
+          "members": 50,
+          "known": 10,
+          "discoverable": 40
+        },
+        "review_sites": {
+          "members": 50,
+          "known": 10,
+          "discoverable": 40
+        }
+      },
+      "memoryEstimateGiB": 22.7
+    }
+  ]
+}

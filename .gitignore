@@ -8,3 +8,5 @@
 !/combinations/*/generated/.keep
 /combinations/*/output/*
 !/combinations/*/output/.keep
+/output-*
+/input/discovery-overrides.scale-*.yaml
